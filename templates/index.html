@@ -11,8 +11,12 @@
         <header>
             <p class="tag">Projeto Python • Versão Web</p>
             <h1>Controle Financeiro</h1>
-            <p class="subtitulo">Acompanhe suas receitas, despesas e saldo em um só lugar.</p>
+            <p class="subtitulo">Cadastre movimentações e acompanhe seu saldo em tempo real.</p>
         </header>
+
+        {% if erro %}
+            <div class="erro">{{ erro }}</div>
+        {% endif %}
 
         <section class="resumo">
             <article class="card">
@@ -31,13 +35,71 @@
             </article>
         </section>
 
-        <section class="painel">
-            <h2>Primeira versão web funcionando 🚀</h2>
-            <p>
-                Nesta etapa, o Python com Flask já está entregando uma página HTML.
-                O próximo passo será cadastrar receitas e despesas pelo navegador.
-            </p>
+        <section class="formularios">
+            <form class="painel" action="{{ url_for('adicionar_receita_web') }}" method="post">
+                <h2>Adicionar receita</h2>
+
+                <label for="descricao-receita">Descrição</label>
+                <input id="descricao-receita" name="descricao" type="text" placeholder="Ex.: Salário">
+
+                <label for="valor-receita">Valor</label>
+                <input id="valor-receita" name="valor" type="text" inputmode="decimal" placeholder="Ex.: 2500,00">
+
+                <button class="botao receita" type="submit">+ Adicionar receita</button>
+            </form>
+
+            <form class="painel" action="{{ url_for('adicionar_despesa_web') }}" method="post">
+                <h2>Adicionar despesa</h2>
+
+                <label for="descricao-despesa">Descrição</label>
+                <input id="descricao-despesa" name="descricao" type="text" placeholder="Ex.: Mercado">
+
+                <label for="valor-despesa">Valor</label>
+                <input id="valor-despesa" name="valor" type="text" inputmode="decimal" placeholder="Ex.: 300,00">
+
+                <button class="botao despesa" type="submit">- Adicionar despesa</button>
+            </form>
         </section>
+
+        <section class="movimentacoes">
+            <article class="painel">
+                <h2>Receitas</h2>
+
+                {% if receitas %}
+                    <div class="lista">
+                        {% for item in receitas %}
+                            <div class="linha">
+                                <span>{{ item["descricao"] }}</span>
+                                <strong>R$ {{ "%.2f"|format(item["valor"]) }}</strong>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <p class="vazio">Nenhuma receita cadastrada.</p>
+                {% endif %}
+            </article>
+
+            <article class="painel">
+                <h2>Despesas</h2>
+
+                {% if despesas %}
+                    <div class="lista">
+                        {% for item in despesas %}
+                            <div class="linha">
+                                <span>{{ item["descricao"] }}</span>
+                                <strong>R$ {{ "%.2f"|format(item["valor"]) }}</strong>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <p class="vazio">Nenhuma despesa cadastrada.</p>
+                {% endif %}
+            </article>
+        </section>
+
+        <p class="aviso">
+            Nesta versão os dados ficam apenas na memória. Na próxima etapa vamos salvá-los com SQLite.
+        </p>
     </main>
 </body>
 </html>

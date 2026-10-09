@@ -10,7 +10,7 @@ body {
 }
 
 .container {
-    width: min(1000px, 92%);
+    width: min(1100px, 92%);
     margin: 0 auto;
     padding: 48px 0;
 }
@@ -29,15 +29,31 @@ h1 {
     margin: 0 0 10px;
 }
 
-.subtitulo {
-    margin: 0;
+h2 {
+    margin-top: 0;
+}
+
+.subtitulo,
+.vazio,
+.aviso {
     color: #6b7280;
 }
 
-.resumo {
+.resumo,
+.formularios,
+.movimentacoes {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
     gap: 18px;
+}
+
+.resumo {
+    grid-template-columns: repeat(3, 1fr);
+    margin-bottom: 24px;
+}
+
+.formularios,
+.movimentacoes {
+    grid-template-columns: repeat(2, 1fr);
     margin-bottom: 24px;
 }
 
@@ -59,12 +75,81 @@ h1 {
     font-size: 26px;
 }
 
-.painel h2 {
-    margin-top: 0;
+label {
+    display: block;
+    font-weight: bold;
+    margin: 16px 0 7px;
 }
 
-@media (max-width: 700px) {
-    .resumo {
+input {
+    width: 100%;
+    padding: 12px 14px;
+    border: 1px solid #d1d5db;
+    border-radius: 9px;
+    font-size: 16px;
+}
+
+input:focus {
+    outline: 2px solid #9ca3af;
+    border-color: transparent;
+}
+
+.botao {
+    width: 100%;
+    margin-top: 18px;
+    padding: 13px 16px;
+    border: 0;
+    border-radius: 9px;
+    color: white;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.receita {
+    background: #15803d;
+}
+
+.despesa {
+    background: #b91c1c;
+}
+
+.lista {
+    display: grid;
+    gap: 10px;
+}
+
+.linha {
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 12px 0;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.linha:last-child {
+    border-bottom: 0;
+}
+
+.erro {
+    margin-bottom: 24px;
+    padding: 14px 16px;
+    background: #fee2e2;
+    border: 1px solid #fecaca;
+    border-radius: 10px;
+    color: #991b1b;
+    font-weight: bold;
+}
+
+.aviso {
+    text-align: center;
+    margin: 0;
+}
+
+@media (max-width: 760px) {
+    .resumo,
+    .formularios,
+    .movimentacoes {
         grid-template-columns: 1fr;
     }
 
