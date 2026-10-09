@@ -1,144 +1,187 @@
-# Controle Financeiro em Python
+# Fluxo — Controle Financeiro
 
-Projeto de estudos e portfólio desenvolvido em Python, evoluindo de uma aplicação de terminal para uma aplicação web com persistência de dados.
+Um painel financeiro pessoal desenvolvido em **Python + Flask + SQLite**, criado a partir da evolução de um projeto de terminal.
 
-## Versões do projeto
+O objetivo foi transformar exercícios de lógica e Python em uma aplicação pequena, funcional e apresentável para portfólio.
 
-### Versão 1 — Terminal
+![Preview do Fluxo](docs/preview.png)
 
-A primeira versão funciona diretamente no terminal e foi criada para praticar lógica de programação, funções, listas, dicionários, validações e tratamento de erros.
+## ✦ O que o sistema faz
 
-Arquivo principal:
+- registra receitas e despesas;
+- calcula saldo, total de entradas e total de saídas;
+- mantém um histórico único de movimentações;
+- salva os dados localmente com SQLite;
+- aceita valores no formato brasileiro, como `1.250,90`;
+- formata os valores em reais;
+- permite excluir movimentações;
+- valida campos e valores inválidos;
+- possui layout responsivo para desktop e celular;
+- mantém o banco local fora do GitHub.
 
-```text
-controle_financeiro.py
-```
-
-### Versão 2 — Web
-
-A versão web usa Flask, HTML, CSS e SQLite.
-
-Ela permite cadastrar receitas e despesas pelo navegador e mantém os dados salvos mesmo depois que o servidor é encerrado.
-
-Arquivo principal:
-
-```text
-app.py
-```
-
-## Funcionalidades atuais
-
-- Adicionar receitas com descrição e valor
-- Adicionar despesas com descrição e valor
-- Listar movimentações
-- Calcular total de receitas
-- Calcular total de despesas
-- Calcular saldo atual automaticamente
-- Validar valores inválidos, negativos ou iguais a zero
-- Interface web responsiva
-- Persistência local com SQLite
-
-## Tecnologias
-
-- Python
-- Flask
-- SQLite
-- HTML
-- CSS
-- Git
-- GitHub
-
-## Conceitos praticados
-
-- Variáveis
-- `input()` e `print()`
-- `if`, `elif` e `else`
-- `while` e `break`
-- Listas e dicionários
-- `append()`
-- `for`
-- `len()` e `sum()`
-- Funções com `def`
-- Parâmetros e `return`
-- `try` / `except`
-- `ValueError`
-- F-strings
-- Rotas Flask
-- Requisições GET e POST
-- Formulários HTML
-- Templates com Jinja
-- SQL básico
-- `CREATE TABLE`, `INSERT` e `SELECT`
-
-## Como executar a versão web
-
-1. Tenha o Python instalado.
-2. Clone ou baixe este repositório.
-3. Abra o terminal na pasta do projeto.
-4. Crie um ambiente virtual:
-
-```bash
-python -m venv .venv
-```
-
-5. Ative o ambiente virtual no Windows:
-
-```powershell
-.\.venv\Scripts\Activate.ps1
-```
-
-6. Instale as dependências:
-
-```bash
-pip install -r requirements.txt
-```
-
-7. Execute:
-
-```bash
-python app.py
-```
-
-8. Abra no navegador:
+## ✦ Stack
 
 ```text
-http://127.0.0.1:5000
+Python
+├── Flask
+└── SQLite
+
+Frontend
+├── HTML
+├── CSS
+└── Jinja
+
+Versionamento
+├── Git
+└── GitHub
 ```
 
-O arquivo `financeiro.db` é criado automaticamente na primeira execução e fica apenas na máquina local.
+## ✦ Arquitetura
 
-## Como executar a versão de terminal
-
-```bash
-python controle_financeiro.py
+```text
+Navegador
+    ↓
+HTML + CSS
+    ↓
+Flask
+    ↓
+Python
+    ↓
+SQLite
+    ↓
+financeiro.db
 ```
 
-## Estrutura atual
+O arquivo `financeiro.db` é criado automaticamente e fica somente na máquina local.
+
+## ✦ Estrutura do projeto
 
 ```text
 controle-financeiro-python/
+│
 ├── app.py
 ├── controle_financeiro.py
 ├── requirements.txt
 ├── README.md
 ├── .gitignore
+│
 ├── templates/
 │   └── index.html
-└── static/
-    └── style.css
+│
+├── static/
+│   ├── style.css
+│   └── favicon.svg
+│
+└── docs/
+    └── preview.png
 ```
 
-## Próximas evoluções
+### `controle_financeiro.py`
 
-- Excluir movimentações
-- Editar movimentações
-- Adicionar categorias
-- Exibir datas de forma amigável
-- Filtros por período
-- Melhorias visuais
-- Testes automatizados
-- Publicação da aplicação web
+Primeira versão do projeto, executada no terminal.
+
+Foi usada para praticar lógica antes da construção da interface web.
+
+### `app.py`
+
+Backend da versão web. Nele ficam:
+
+- rotas Flask;
+- validações;
+- comunicação com SQLite;
+- cálculos do resumo financeiro;
+- formatação de valores e datas.
+
+## ✦ Como executar
+
+### 1. Clone o repositório
+
+```bash
+git clone https://github.com/felipe110606/controle-financeiro-python.git
+cd controle-financeiro-python
+```
+
+### 2. Crie o ambiente virtual
+
+```bash
+python -m venv .venv
+```
+
+### 3. Ative no Windows
+
+```powershell
+.\.venv\Scripts\Activate.ps1
+```
+
+### 4. Instale as dependências
+
+```bash
+pip install -r requirements.txt
+```
+
+### 5. Execute
+
+```bash
+python app.py
+```
+
+### 6. Abra no navegador
+
+```text
+http://127.0.0.1:5000
+```
+
+## ✦ Conceitos praticados
+
+Durante a evolução do projeto foram usados:
+
+- variáveis e tipos de dados;
+- condicionais;
+- laços;
+- listas e dicionários;
+- funções, parâmetros e retornos;
+- tratamento de erros;
+- rotas GET e POST;
+- formulários HTML;
+- templates Jinja;
+- SQL básico;
+- `CREATE TABLE`;
+- `SELECT`;
+- `INSERT`;
+- `DELETE`;
+- persistência de dados;
+- Git, commits, branches e push.
+
+## ✦ Evolução
+
+O projeto começou como uma aplicação simples de terminal e foi evoluído em etapas:
+
+```text
+Terminal
+   ↓
+Funções e validações
+   ↓
+Flask
+   ↓
+HTML + CSS
+   ↓
+Formulários web
+   ↓
+SQLite
+   ↓
+Dashboard responsivo
+```
+
+## ✦ Próximos passos possíveis
+
+- edição de movimentações;
+- categorias;
+- filtros por período;
+- gráficos;
+- testes automatizados;
+- autenticação;
+- deploy da aplicação.
 
 ---
 
-Projeto desenvolvido como parte dos meus estudos de Python e desenvolvimento de software.
+Projeto desenvolvido durante meus estudos de **Python e desenvolvimento de software**.

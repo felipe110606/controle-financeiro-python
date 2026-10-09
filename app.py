@@ -1,4 +1,5 @@
 import sqlite3
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 from flask import Flask, redirect, render_template, request, url_for
@@ -29,47 +30,56 @@ def criar_banco():
         )
 
 
-def listar_movimentacoes(tipo):
+def listar_movimentacoes():
     with conectar_banco() as conexao:
-        registros = conexao.execute(
+        return conexao.execute(
             """
-            SELECT id, descricao, valor, criado_em
+            SELECT id, tipo, descricao, valor, criado_em
             FROM movimentacoes
-            WHERE tipo = ?
             ORDER BY id DESC
-            """,
-            (tipo,)
+            """
         ).fetchall()
 
-    return registros
 
-
-def calcular_totais():
+def calcular_resumo():
     with conectar_banco() as conexao:
-        totais = conexao.execute(
+        resumo = conexao.execute(
             """
             SELECT
-                COALESCE(
-                    SUM(CASE WHEN tipo = 'receita' THEN valor ELSE 0 END),
-                    0
-                ) AS total_receitas,
-                COALESCE(
-                    SUM(CASE WHEN tipo = 'despesa' THEN valor ELSE 0 END),
-                    0
-                ) AS total_despesas
+                COALESCE(SUM(CASE WHEN tipo = 'receita' THEN valor ELSE 0 END), 0)
+                    AS total_receitas,
+                COALESCE(SUM(CASE WHEN tipo = 'despesa' THEN valor ELSE 0 END), 0)
+                    AS total_despesas,
+                COUNT(*) AS quantidade
             FROM movimentacoes
             """
         ).fetchone()
 
-    total_receitas = totais["total_receitas"]
-    total_despesas = totais["total_despesas"]
+    total_receitas = resumo["total_receitas"]
+    total_despesas = resumo["total_despesas"]
     saldo = total_receitas - total_despesas
 
-    return total_receitas, total_despesas, saldo
+    if total_receitas > 0:
+        percentual_disponivel = (saldo / total_receitas) * 100
+    else:
+        percentual_disponivel = 0
+
+    return {
+        "saldo": saldo,
+        "total_receitas": total_receitas,
+        "total_despesas": total_despesas,
+        "quantidade": resumo["quantidade"],
+        "percentual_disponivel": percentual_disponivel,
+    }
 
 
 def converter_valor(valor_texto):
-    return float(valor_texto.replace(",", "."))
+    valor_limpo = valor_texto.strip().replace("R$", "").replace(" ", "")
+
+    if "," in valor_limpo:
+        valor_limpo = valor_limpo.replace(".", "").replace(",", ".")
+
+    return float(valor_limpo)
 
 
 def salvar_movimentacao(tipo, descricao, valor):
@@ -79,22 +89,60 @@ def salvar_movimentacao(tipo, descricao, valor):
             INSERT INTO movimentacoes (tipo, descricao, valor)
             VALUES (?, ?, ?)
             """,
-            (tipo, descricao, valor)
+            (tipo, descricao, valor),
         )
+
+
+def validar_movimentacao(descricao, valor_texto, tipo):
+    nome_tipo = "receita" if tipo == "receita" else "despesa"
+
+    if not descricao:
+        return None, f"Digite uma descrição para a {nome_tipo}."
+
+    if len(descricao) > 60:
+        return None, "A descrição deve ter no máximo 60 caracteres."
+
+    try:
+        valor = converter_valor(valor_texto)
+    except ValueError:
+        return None, f"Digite um valor numérico válido para a {nome_tipo}."
+
+    if valor <= 0:
+        return None, f"O valor da {nome_tipo} deve ser maior que zero."
+
+    return valor, None
+
+
+@app.template_filter("brl")
+def formatar_brl(valor):
+    numero = f"{float(valor):,.2f}"
+    numero = numero.replace(",", "X").replace(".", ",").replace("X", ".")
+    return f"R$ {numero}"
+
+
+@app.template_filter("data_br")
+def formatar_data_br(valor):
+    if not valor:
+        return ""
+
+    try:
+        data_utc = datetime.strptime(valor, "%Y-%m-%d %H:%M:%S").replace(
+            tzinfo=timezone.utc
+        )
+        horario_brasilia = data_utc.astimezone(timezone(timedelta(hours=-3)))
+        return horario_brasilia.strftime("%d/%m/%Y • %H:%M")
+    except ValueError:
+        return valor
 
 
 @app.route("/")
 def inicio():
-    total_receitas, total_despesas, saldo = calcular_totais()
-
     return render_template(
         "index.html",
-        saldo=saldo,
-        total_receitas=total_receitas,
-        total_despesas=total_despesas,
-        receitas=listar_movimentacoes("receita"),
-        despesas=listar_movimentacoes("despesa"),
-        erro=request.args.get("erro")
+        resumo=calcular_resumo(),
+        movimentacoes=listar_movimentacoes(),
+        erro=request.args.get("erro"),
+        sucesso=request.args.get("sucesso"),
     )
 
 
@@ -103,33 +151,13 @@ def adicionar_receita_web():
     descricao = request.form.get("descricao", "").strip()
     valor_texto = request.form.get("valor", "").strip()
 
-    try:
-        valor = converter_valor(valor_texto)
+    valor, erro = validar_movimentacao(descricao, valor_texto, "receita")
 
-        if not descricao:
-            return redirect(
-                url_for("inicio", erro="Digite uma descrição para a receita.")
-            )
+    if erro:
+        return redirect(url_for("inicio", erro=erro))
 
-        if valor <= 0:
-            return redirect(
-                url_for(
-                    "inicio",
-                    erro="O valor da receita deve ser maior que zero."
-                )
-            )
-
-        salvar_movimentacao("receita", descricao, valor)
-
-    except ValueError:
-        return redirect(
-            url_for(
-                "inicio",
-                erro="Digite um valor numérico válido para a receita."
-            )
-        )
-
-    return redirect(url_for("inicio"))
+    salvar_movimentacao("receita", descricao, valor)
+    return redirect(url_for("inicio", sucesso="Receita adicionada com sucesso."))
 
 
 @app.route("/despesas", methods=["POST"])
@@ -137,33 +165,34 @@ def adicionar_despesa_web():
     descricao = request.form.get("descricao", "").strip()
     valor_texto = request.form.get("valor", "").strip()
 
-    try:
-        valor = converter_valor(valor_texto)
+    valor, erro = validar_movimentacao(descricao, valor_texto, "despesa")
 
-        if not descricao:
+    if erro:
+        return redirect(url_for("inicio", erro=erro))
+
+    salvar_movimentacao("despesa", descricao, valor)
+    return redirect(url_for("inicio", sucesso="Despesa adicionada com sucesso."))
+
+
+@app.route("/movimentacoes/<int:movimentacao_id>/excluir", methods=["POST"])
+def excluir_movimentacao(movimentacao_id):
+    with conectar_banco() as conexao:
+        movimentacao = conexao.execute(
+            "SELECT id FROM movimentacoes WHERE id = ?",
+            (movimentacao_id,),
+        ).fetchone()
+
+        if movimentacao is None:
             return redirect(
-                url_for("inicio", erro="Digite uma descrição para a despesa.")
+                url_for("inicio", erro="Essa movimentação não foi encontrada.")
             )
 
-        if valor <= 0:
-            return redirect(
-                url_for(
-                    "inicio",
-                    erro="O valor da despesa deve ser maior que zero."
-                )
-            )
-
-        salvar_movimentacao("despesa", descricao, valor)
-
-    except ValueError:
-        return redirect(
-            url_for(
-                "inicio",
-                erro="Digite um valor numérico válido para a despesa."
-            )
+        conexao.execute(
+            "DELETE FROM movimentacoes WHERE id = ?",
+            (movimentacao_id,),
         )
 
-    return redirect(url_for("inicio"))
+    return redirect(url_for("inicio", sucesso="Movimentação excluída."))
 
 
 criar_banco()
