@@ -4,6 +4,8 @@ Meu primeiro projeto estruturado em Python para portfólio no GitHub.
 
 O programa funciona no terminal e permite registrar receitas e despesas, acompanhar o saldo e visualizar um resumo financeiro.
 
+**Versão atual:** 1.0 — aplicação de terminal.
+
 ## Funcionalidades
 
 - Adicionar receitas com descrição e valor
