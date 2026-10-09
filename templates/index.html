@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Controle Financeiro</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <main class="container">
+        <header>
+            <p class="tag">Projeto Python • Versão Web</p>
+            <h1>Controle Financeiro</h1>
+            <p class="subtitulo">Acompanhe suas receitas, despesas e saldo em um só lugar.</p>
+        </header>
+
+        <section class="resumo">
+            <article class="card">
+                <span>Saldo atual</span>
+                <strong>R$ {{ "%.2f"|format(saldo) }}</strong>
+            </article>
+
+            <article class="card">
+                <span>Total de receitas</span>
+                <strong>R$ {{ "%.2f"|format(total_receitas) }}</strong>
+            </article>
+
+            <article class="card">
+                <span>Total de despesas</span>
+                <strong>R$ {{ "%.2f"|format(total_despesas) }}</strong>
+            </article>
+        </section>
+
+        <section class="painel">
+            <h2>Primeira versão web funcionando 🚀</h2>
+            <p>
+                Nesta etapa, o Python com Flask já está entregando uma página HTML.
+                O próximo passo será cadastrar receitas e despesas pelo navegador.
+            </p>
+        </section>
+    </main>
+</body>
+</html>
