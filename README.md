@@ -1,30 +1,60 @@
 # Controle Financeiro em Python
 
-Meu primeiro projeto estruturado em Python para portfólio no GitHub.
+Projeto de estudos e portfólio desenvolvido em Python, evoluindo de uma aplicação de terminal para uma aplicação web com persistência de dados.
 
-O programa funciona no terminal e permite registrar receitas e despesas, acompanhar o saldo e visualizar um resumo financeiro.
+## Versões do projeto
 
-**Versão atual:** 1.0 — aplicação de terminal.
+### Versão 1 — Terminal
 
-## Funcionalidades
+A primeira versão funciona diretamente no terminal e foi criada para praticar lógica de programação, funções, listas, dicionários, validações e tratamento de erros.
+
+Arquivo principal:
+
+```text
+controle_financeiro.py
+```
+
+### Versão 2 — Web
+
+A versão web usa Flask, HTML, CSS e SQLite.
+
+Ela permite cadastrar receitas e despesas pelo navegador e mantém os dados salvos mesmo depois que o servidor é encerrado.
+
+Arquivo principal:
+
+```text
+app.py
+```
+
+## Funcionalidades atuais
 
 - Adicionar receitas com descrição e valor
 - Adicionar despesas com descrição e valor
-- Listar receitas cadastradas
-- Listar despesas cadastradas
-- Consultar o saldo atual
-- Exibir resumo financeiro
+- Listar movimentações
+- Calcular total de receitas
+- Calcular total de despesas
+- Calcular saldo atual automaticamente
 - Validar valores inválidos, negativos ou iguais a zero
-- Manter o programa em execução por meio de um menu interativo
+- Interface web responsiva
+- Persistência local com SQLite
 
-## Conceitos de Python praticados
+## Tecnologias
+
+- Python
+- Flask
+- SQLite
+- HTML
+- CSS
+- Git
+- GitHub
+
+## Conceitos praticados
 
 - Variáveis
 - `input()` e `print()`
 - `if`, `elif` e `else`
 - `while` e `break`
-- Listas
-- Dicionários
+- Listas e dicionários
 - `append()`
 - `for`
 - `len()` e `sum()`
@@ -33,48 +63,81 @@ O programa funciona no terminal e permite registrar receitas e despesas, acompan
 - `try` / `except`
 - `ValueError`
 - F-strings
+- Rotas Flask
+- Requisições GET e POST
+- Formulários HTML
+- Templates com Jinja
+- SQL básico
+- `CREATE TABLE`, `INSERT` e `SELECT`
 
-## Como executar
+## Como executar a versão web
 
 1. Tenha o Python instalado.
 2. Clone ou baixe este repositório.
 3. Abra o terminal na pasta do projeto.
-4. Execute:
+4. Crie um ambiente virtual:
+
+```bash
+python -m venv .venv
+```
+
+5. Ative o ambiente virtual no Windows:
+
+```powershell
+.\.venv\Scripts\Activate.ps1
+```
+
+6. Instale as dependências:
+
+```bash
+pip install -r requirements.txt
+```
+
+7. Execute:
+
+```bash
+python app.py
+```
+
+8. Abra no navegador:
+
+```text
+http://127.0.0.1:5000
+```
+
+O arquivo `financeiro.db` é criado automaticamente na primeira execução e fica apenas na máquina local.
+
+## Como executar a versão de terminal
 
 ```bash
 python controle_financeiro.py
 ```
 
-## Exemplo do menu
-
-```text
-=== CONTROLE FINANCEIRO ===
-1 - Adicionar receita
-2 - Adicionar despesa
-3 - Ver receitas
-4 - Ver despesas
-5 - Ver saldo
-6 - Ver resumo financeiro
-7 - Sair
-```
-
-## Estrutura do projeto
+## Estrutura atual
 
 ```text
 controle-financeiro-python/
+├── app.py
 ├── controle_financeiro.py
+├── requirements.txt
 ├── README.md
-└── .gitignore
+├── .gitignore
+├── templates/
+│   └── index.html
+└── static/
+    └── style.css
 ```
 
 ## Próximas evoluções
 
-- Persistência de dados
-- SQLite
-- Interface web
-- HTML e CSS
-- Flask
-- Melhorias de organização e testes
+- Excluir movimentações
+- Editar movimentações
+- Adicionar categorias
+- Exibir datas de forma amigável
+- Filtros por período
+- Melhorias visuais
+- Testes automatizados
+- Publicação da aplicação web
 
 ---
 
