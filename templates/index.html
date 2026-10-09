@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#0b1120">
+    <meta name="description" content="Fluxo — painel financeiro pessoal feito em Python, Flask e SQLite.">
+    <title>Fluxo — Controle Financeiro</title>
+    <link rel="icon" href="{{ url_for('static', filename='favicon.svg') }}" type="image/svg+xml">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="page-shell">
+        <nav class="topbar">
+            <a class="brand" href="{{ url_for('inicio') }}" aria-label="Fluxo - início">
+                <span class="brand-mark">F</span>
+                <span class="brand-copy">
+                    <strong>fluxo</strong>
+                    <small>finanças pessoais</small>
+                </span>
+            </a>
+
+            <div class="storage-status" title="Os dados ficam salvos no seu computador">
+                <span class="status-dot"></span>
+                <span>dados locais</span>
+                <span class="tech-pill">SQLite</span>
+            </div>
+        </nav>
+
+        <main>
+            <section class="hero">
+                <div class="hero-copy">
+                    <p class="eyebrow">PAINEL FINANCEIRO</p>
+                    <h1>Dinheiro claro.<br><span>Decisão tranquila.</span></h1>
+                    <p class="hero-text">
+                        Um painel simples para registrar o que entra, entender o que sai
+                        e manter o saldo sob controle.
+                    </p>
+                </div>
+
+                <article class="balance-card {{ 'negative' if resumo.saldo < 0 else 'positive' }}">
+                    <div class="balance-top">
+                        <span>Saldo disponível</span>
+                        <span class="balance-state">
+                            {{ 'atenção' if resumo.saldo < 0 else 'em dia' }}
+                        </span>
+                    </div>
+
+                    <strong class="balance-value">{{ resumo.saldo | brl }}</strong>
+
+                    <div class="balance-footer">
+                        <span>
+                            {% if resumo.total_receitas > 0 %}
+                                {{ "%.0f"|format(resumo.percentual_disponivel) }}% das entradas disponível
+                            {% else %}
+                                Adicione sua primeira entrada
+                            {% endif %}
+                        </span>
+                        <span>{{ resumo.quantidade }} movimentação{{ '' if resumo.quantidade == 1 else 'ões' }}</span>
+                    </div>
+                </article>
+            </section>
+
+            {% if erro %}
+                <div class="notice notice-error" role="alert">
+                    <span class="notice-icon">!</span>
+                    <span>{{ erro }}</span>
+                </div>
+            {% endif %}
+
+            {% if sucesso %}
+                <div class="notice notice-success" role="status">
+                    <span class="notice-icon">✓</span>
+                    <span>{{ sucesso }}</span>
+                </div>
+            {% endif %}
+
+            <section class="metrics" aria-label="Resumo financeiro">
+                <article class="metric-card">
+                    <div class="metric-icon income-icon">↗</div>
+                    <div>
+                        <span class="metric-label">Entradas</span>
+                        <strong>{{ resumo.total_receitas | brl }}</strong>
+                        <small>receitas registradas</small>
+                    </div>
+                </article>
+
+                <article class="metric-card">
+                    <div class="metric-icon expense-icon">↘</div>
+                    <div>
+                        <span class="metric-label">Saídas</span>
+                        <strong>{{ resumo.total_despesas | brl }}</strong>
+                        <small>despesas registradas</small>
+                    </div>
+                </article>
+
+                <article class="metric-card metric-card-accent">
+                    <div class="metric-icon neutral-icon">#</div>
+                    <div>
+                        <span class="metric-label">Movimentações</span>
+                        <strong>{{ resumo.quantidade }}</strong>
+                        <small>registros no histórico</small>
+                    </div>
+                </article>
+            </section>
+
+            <section class="workspace">
+                <article class="composer">
+                    <div class="section-heading">
+                        <div>
+                            <p class="section-kicker">NOVO REGISTRO</p>
+                            <h2>Movimente seu fluxo</h2>
+                        </div>
+                        <span class="section-number">01</span>
+                    </div>
+
+                    <div class="form-grid">
+                        <form class="transaction-form income-form" action="{{ url_for('adicionar_receita_web') }}" method="post">
+                            <div class="form-heading">
+                                <span class="form-symbol">+</span>
+                                <div>
+                                    <h3>Nova receita</h3>
+                                    <p>Salário, renda extra, venda...</p>
+                                </div>
+                            </div>
+
+                            <label for="descricao-receita">Descrição</label>
+                            <input
+                                id="descricao-receita"
+                                name="descricao"
+                                type="text"
+                                maxlength="60"
+                                autocomplete="off"
+                                placeholder="Ex.: Salário"
+                                required
+                            >
+
+                            <label for="valor-receita">Valor</label>
+                            <div class="money-input">
+                                <span>R$</span>
+                                <input
+                                    id="valor-receita"
+                                    name="valor"
+                                    type="text"
+                                    inputmode="decimal"
+                                    autocomplete="off"
+                                    placeholder="0,00"
+                                    required
+                                >
+                            </div>
+
+                            <button class="primary-button income-button" type="submit">
+                                Registrar entrada
+                                <span>↗</span>
+                            </button>
+                        </form>
+
+                        <form class="transaction-form expense-form" action="{{ url_for('adicionar_despesa_web') }}" method="post">
+                            <div class="form-heading">
+                                <span class="form-symbol">−</span>
+                                <div>
+                                    <h3>Nova despesa</h3>
+                                    <p>Conta, mercado, transporte...</p>
+                                </div>
+                            </div>
+
+                            <label for="descricao-despesa">Descrição</label>
+                            <input
+                                id="descricao-despesa"
+                                name="descricao"
+                                type="text"
+                                maxlength="60"
+                                autocomplete="off"
+                                placeholder="Ex.: Mercado"
+                                required
+                            >
+
+                            <label for="valor-despesa">Valor</label>
+                            <div class="money-input">
+                                <span>R$</span>
+                                <input
+                                    id="valor-despesa"
+                                    name="valor"
+                                    type="text"
+                                    inputmode="decimal"
+                                    autocomplete="off"
+                                    placeholder="0,00"
+                                    required
+                                >
+                            </div>
+
+                            <button class="primary-button expense-button" type="submit">
+                                Registrar saída
+                                <span>↘</span>
+                            </button>
+                        </form>
+                    </div>
+                </article>
+
+                <aside class="insight-card">
+                    <p class="section-kicker">LEITURA RÁPIDA</p>
+                    <h2>Seu mês em uma frase.</h2>
+
+                    {% if resumo.quantidade == 0 %}
+                        <p class="insight-text">
+                            Seu painel está limpo. Registre uma entrada ou saída para começar a construir seu histórico.
+                        </p>
+                    {% elif resumo.saldo < 0 %}
+                        <p class="insight-text">
+                            Suas saídas estão acima das entradas. Vale revisar os últimos gastos antes do próximo registro.
+                        </p>
+                    {% elif resumo.total_despesas == 0 %}
+                        <p class="insight-text">
+                            Você já registrou entradas e ainda não há despesas. O saldo está totalmente preservado.
+                        </p>
+                    {% else %}
+                        <p class="insight-text">
+                            Você mantém {{ "%.0f"|format(resumo.percentual_disponivel) }}% do que entrou disponível no saldo atual.
+                        </p>
+                    {% endif %}
+
+                    <div class="insight-scale">
+                        <div class="scale-labels">
+                            <span>saídas</span>
+                            <span>saldo</span>
+                        </div>
+                        <div class="scale-track">
+                            {% set base = resumo.total_receitas if resumo.total_receitas > 0 else 1 %}
+                            {% set usado = (resumo.total_despesas / base * 100) %}
+                            <span class="scale-fill" style="width: {{ [usado, 100] | min }}%"></span>
+                        </div>
+                    </div>
+
+                    <div class="privacy-note">
+                        <span class="privacy-icon">⌁</span>
+                        <div>
+                            <strong>Local por padrão</strong>
+                            <p>Seu banco <code>financeiro.db</code> fica nesta máquina e não é enviado ao GitHub.</p>
+                        </div>
+                    </div>
+                </aside>
+            </section>
+
+            <section class="history-section">
+                <div class="section-heading history-heading">
+                    <div>
+                        <p class="section-kicker">HISTÓRICO</p>
+                        <h2>Movimentações recentes</h2>
+                    </div>
+                    <span class="section-number">02</span>
+                </div>
+
+                {% if movimentacoes %}
+                    <div class="transaction-list">
+                        {% for item in movimentacoes %}
+                            <article class="transaction-row">
+                                <div class="transaction-main">
+                                    <span class="transaction-badge {{ item['tipo'] }}">
+                                        {{ '↗' if item['tipo'] == 'receita' else '↘' }}
+                                    </span>
+
+                                    <div class="transaction-copy">
+                                        <strong>{{ item["descricao"] }}</strong>
+                                        <span>
+                                            {{ 'Entrada' if item['tipo'] == 'receita' else 'Saída' }}
+                                            <i>•</i>
+                                            {{ item["criado_em"] | data_br }}
+                                        </span>
+                                    </div>
+                                </div>
+
+                                <div class="transaction-actions">
+                                    <strong class="transaction-value {{ item['tipo'] }}">
+                                        {{ '+' if item['tipo'] == 'receita' else '−' }} {{ item["valor"] | brl }}
+                                    </strong>
+
+                                    <form
+                                        action="{{ url_for('excluir_movimentacao', movimentacao_id=item['id']) }}"
+                                        method="post"
+                                        onsubmit="return confirm('Excluir esta movimentação?');"
+                                    >
+                                        <button class="delete-button" type="submit" aria-label="Excluir {{ item['descricao'] }}" title="Excluir movimentação">
+                                            ×
+                                        </button>
+                                    </form>
+                                </div>
+                            </article>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="empty-state">
+                        <span class="empty-mark">↗↘</span>
+                        <h3>Nada por aqui ainda.</h3>
+                        <p>Suas receitas e despesas aparecerão neste histórico.</p>
+                    </div>
+                {% endif %}
+            </section>
+        </main>
+
+        <footer>
+            <span>FLUXO / projeto de portfólio</span>
+            <span>Python · Flask · SQLite</span>
+        </footer>
+    </div>
+</body>
+</html>
